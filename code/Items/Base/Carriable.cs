@@ -224,7 +224,7 @@ public abstract partial class Carriable : AnimatedEntity, IEntityHint, IUse
 		TimeSinceDropped = 0;
 	}
 
-	public virtual void SimulateAnimator( PawnAnimator animator )
+	public virtual void SimulateAnimator( PlayerAnimator animator )
 	{
 		animator.SetAnimParameter( "holdtype", (int)Info.HoldType );
 		animator.SetAnimParameter( "aim_body_weight", 1.0f );

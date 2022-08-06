@@ -8,7 +8,7 @@ namespace TTT;
 /// A sublist of <see cref="Entity.Children"/> that contains entities 
 /// of type <see cref="Carriable"/>.
 /// </summary>
-public sealed class Inventory : IEnumerable<Carriable>
+public sealed partial class Inventory : BaseNetworkable, IEnumerable<Carriable>
 {
 	public Player Owner { get; private init; }
 
@@ -21,7 +21,9 @@ public sealed class Inventory : IEnumerable<Carriable>
 	public Carriable this[int i] => _list[i];
 
 	public int Count => _list.Count;
-	private readonly List<Carriable> _list = new();
+
+	[Net, Predicted]
+	private IList<Carriable> _list { get; set; }
 
 	private readonly int[] _slotCapacity = new int[] { 1, 1, 1, 3, 3, 1 };
 	private readonly int[] _weaponsOfAmmoType = new int[] { 0, 0, 0, 0, 0, 0 };
@@ -44,7 +46,16 @@ public sealed class Inventory : IEnumerable<Carriable>
 		if ( !CanAdd( carriable ) )
 			return false;
 
-		carriable.SetParent( Owner, true );
+		carriable.SetParent( Owner.PlayerModel, true );
+
+		_list.Add(carriable);
+
+		carriable.OnCarryStart( Owner );
+
+		_slotCapacity[(int)carriable.Info.Slot] -= 1;
+
+		if ( carriable is Weapon weapon )
+			_weaponsOfAmmoType[(int)weapon.Info.AmmoType] += 1;
 
 		if ( makeActive )
 			SetActive( carriable );
@@ -54,7 +65,8 @@ public sealed class Inventory : IEnumerable<Carriable>
 
 	public bool CanAdd( Carriable carriable )
 	{
-		if ( Host.IsClient && carriable.Parent == Owner )
+		// Used to check carriable.Parent == Owner here, might need to add a similar check
+		if ( Host.IsClient )
 			return true;
 
 		if ( !HasFreeSlot( carriable.Info.Slot ) )
@@ -97,7 +109,12 @@ public sealed class Inventory : IEnumerable<Carriable>
 			return;
 		}
 
-		var entities = _list.FindAll( x => x.Info.Slot == carriable.Info.Slot );
+		var entities = new List<Carriable>();
+		foreach(var entity in _list)
+		{
+			if(entity.Info.Slot == carriable.Info.Slot)
+				entities.Add(entity);
+		}
 
 		if ( Active is not null && Active.Info.Slot == carriable.Info.Slot )
 		{
@@ -147,6 +164,7 @@ public sealed class Inventory : IEnumerable<Carriable>
 		if ( !carriable.Info.CanDrop )
 			return false;
 
+		OnChildRemoved(carriable);
 		carriable.Parent = null;
 
 		return true;
@@ -171,7 +189,7 @@ public sealed class Inventory : IEnumerable<Carriable>
 	{
 		Host.AssertServer();
 
-		foreach ( var carriable in _list.ToArray() )
+		foreach ( var carriable in _list )
 			Drop( carriable );
 
 		Active = null;
@@ -183,7 +201,7 @@ public sealed class Inventory : IEnumerable<Carriable>
 	{
 		Host.AssertServer();
 
-		foreach ( var carriable in _list.ToArray() )
+		foreach ( var carriable in _list )
 			carriable.Delete();
 
 		Active = null;
@@ -230,6 +248,7 @@ public sealed class Inventory : IEnumerable<Carriable>
 		if ( !carriable.IsValid() || !Contains( carriable ) )
 			return null;
 
+		carriable.Owner.Inventory.OnChildRemoved(carriable);
 		carriable.Parent = null;
 		carriable.Delete();
 

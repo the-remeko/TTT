@@ -13,14 +13,6 @@ public class Clothing : ModelEntity
 		PhysicsEnabled = false;
 		UsePhysicsCollision = false;
 	}
-
-	public void Detach()
-	{
-		Parent = null;
-		EnableAllCollisions = true;
-		PhysicsEnabled = true;
-		UsePhysicsCollision = true;
-	}
 }
 
 public partial class Player
@@ -36,7 +28,7 @@ public partial class Player
 		AttachClothing( "models/citizen_clothes/vest/tactical_vest/models/tactical_vest.vmdl" );
 		AttachClothing( "models/citizen_clothes/shoes/trainers/trainers.vmdl" );
 
-		SetClothingBodyGroups( this, 1 );
+		SetClothingBodyGroups( PlayerModel, 1 );
 	}
 
 	public void AttachClothing( string path )
@@ -55,6 +47,7 @@ public partial class Player
 			if ( clothingPiece.Model.ResourcePath != path )
 				continue;
 
+			Clothes.Remove(clothingPiece);
 			clothingPiece.Delete();
 			return true;
 		}
@@ -65,16 +58,28 @@ public partial class Player
 	public void RemoveAllClothing()
 	{
 		foreach ( var clothing in Clothes.ToArray() )
+		{
+			Clothes.Remove(clothing);
 			clothing.Delete();
+		}
 
-		SetClothingBodyGroups( this, 1 );
+		SetClothingBodyGroups( PlayerModel, 1 );
 	}
 
 	private void AttachClothing( Clothing clothing )
 	{
-		clothing.SetParent( this, true );
+		Clothes.Add(clothing);
+		clothing.SetParent( PlayerModel, true );
 		clothing.EnableShadowInFirstPerson = true;
 		clothing.EnableHideInFirstPerson = true;
+	}
+
+	public void DetachClothing( Clothing clothing )
+	{
+		Clothes.Remove(clothing);
+		clothing.SetParent(null);
+		clothing.PhysicsEnabled = true;
+		clothing.UsePhysicsCollision = true;
 	}
 
 	// So that the clothes we use don't clip with the player model.

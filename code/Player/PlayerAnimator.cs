@@ -3,10 +3,71 @@ using System;
 
 namespace TTT;
 
-public class PlayerAnimator : PawnAnimator
+public class PlayerAnimator : PawnController
 {
+	public Player AnimPawn => Pawn as Player;
+
 	TimeSince _timeSinceFootShuffle = 60;
 	float _duck;
+
+	/// <summary>
+	/// We'll convert Position to a local position to the players eyes and set
+	/// the param on the animgraph.
+	/// </summary>
+	public virtual void SetLookAt( string name, Vector3 Position )
+	{
+		var localPos = (Position - Pawn.EyePosition) * Rotation.Inverse;
+		SetAnimParameter( name, localPos );
+	}
+
+	/// <summary>
+	/// Sets the param on the animgraph
+	/// </summary>
+	public virtual void SetAnimParameter( string name, Vector3 val )
+	{
+		AnimPawn?.PlayerModel.SetAnimParameter( name, val );
+	}
+
+	/// <summary>
+	/// Sets the param on the animgraph
+	/// </summary>
+	public virtual void SetAnimParameter( string name, float val )
+	{
+		AnimPawn?.PlayerModel.SetAnimParameter( name, val );
+	}
+
+	/// <summary>
+	/// Sets the param on the animgraph
+	/// </summary>
+	public virtual void SetAnimParameter( string name, bool val )
+	{
+		AnimPawn?.PlayerModel.SetAnimParameter( name, val );
+	}
+
+	/// <summary>
+	/// Sets the param on the animgraph
+	/// </summary>
+	public virtual void SetAnimParameter( string name, int val )
+	{
+		AnimPawn?.PlayerModel.SetAnimParameter( name, val );
+	}
+
+	/// <summary>
+	/// Calls SetParam( name, true ). It's expected that your animgraph
+	/// has a "name" param with the auto reset property set.
+	/// </summary>
+	public virtual void Trigger( string name )
+	{
+		SetAnimParameter( name, true );
+	}
+
+	/// <summary>
+	/// Resets all params to default values on the animgraph
+	/// </summary>
+	public virtual void ResetParameters()
+	{
+		AnimPawn?.PlayerModel.ResetAnimParameters();
+	}
 
 	public override void Simulate()
 	{
@@ -46,6 +107,19 @@ public class PlayerAnimator : PawnAnimator
 			_duck = _duck.LerpTo( 0.0f, Time.Delta * 5.0f );
 
 		SetAnimParameter( "duck", _duck );
+
+		if(Host.IsServer) {
+			if ( HasTag( "airducked" ) )
+			{
+				var distToCeil = player.Controller.TraceBBox( Position, Position + (Vector3.Up * player.Controller.DefaultHeight * 2f) ).Distance;
+				var shift = MathF.Min( distToCeil, player.Controller.DuckHullOffset() );
+
+				player.PlayerModel.LocalPosition = Vector3.Zero - Vector3.Up * shift;
+			} else
+			{
+				player.PlayerModel.LocalPosition = Vector3.Zero;
+			}
+		}
 
 		if ( player is not null && player.ActiveChild.IsValid() )
 		{

@@ -5,6 +5,11 @@ namespace TTT;
 [Title( "Player" ), Icon( "emoji_people" )]
 public partial class Player : AnimatedEntity
 {
+	[Net, Predicted]
+	public PlayerModel PlayerModel { get; set; }
+	[Net, Predicted]
+	public PlayerAnimator Animator { get; private set; }
+	[Net, Predicted]
 	public Inventory Inventory { get; private init; }
 	public Perks Perks { get; private init; }
 
@@ -53,7 +58,6 @@ public partial class Player : AnimatedEntity
 		Tags.Add( "player" );
 		Tags.Add( "solid" );
 
-		SetModel( "models/citizen/citizen.vmdl" );
 		Role = new NoneRole();
 
 		Health = 0;
@@ -67,7 +71,10 @@ public partial class Player : AnimatedEntity
 		EnableShadowInFirstPerson = true;
 		EnableTouch = false;
 
-		Animator = new PlayerAnimator();
+		PlayerModel = new PlayerModel();
+		PlayerModel.Parent = this;
+		Animator = PlayerModel.Animator;
+
 		Camera = new FreeSpectateCamera();
 	}
 
@@ -103,7 +110,7 @@ public partial class Player : AnimatedEntity
 			LifeState = LifeState.Alive;
 
 			EnableAllCollisions = true;
-			EnableDrawing = true;
+			PlayerModel.EnableDrawing = true;
 			EnableTouch = true;
 
 			Controller = new PlayerController()
@@ -162,8 +169,10 @@ public partial class Player : AnimatedEntity
 
 	public override void Simulate( Client client )
 	{
+
 		var controller = GetActiveController();
 		controller?.Simulate( client, this, Animator );
+
 
 		if ( Input.ActiveChild is Carriable carriable )
 			Inventory.SetActive( carriable );
@@ -254,47 +263,6 @@ public partial class Player : AnimatedEntity
 		UI.Crosshair.Instance?.RenderCrosshair( screenSize * 0.5, ActiveChild );
 	}
 
-	#region Animator
-	[Net, Predicted]
-	public PawnAnimator Animator { get; private set; }
-
-	TimeSince _timeSinceLastFootstep;
-
-	/// <summary>
-	/// A foostep has arrived!
-	/// </summary>
-	public override void OnAnimEventFootstep( Vector3 pos, int foot, float volume )
-	{
-		if ( !this.IsAlive() )
-			return;
-
-		if ( !IsClient )
-			return;
-
-		if ( _timeSinceLastFootstep < 0.2f )
-			return;
-
-		volume *= FootstepVolume();
-
-		_timeSinceLastFootstep = 0;
-
-		var trace = Trace.Ray( pos, pos + Vector3.Down * 20 )
-			.Radius( 1 )
-			.Ignore( this )
-			.Run();
-
-		if ( !trace.Hit )
-			return;
-
-		trace.Surface.DoFootstep( this, trace, foot, volume );
-	}
-
-	public float FootstepVolume()
-	{
-		return Velocity.WithZ( 0 ).Length.LerpInverse( 0.0f, 200.0f ) * 0.2f;
-	}
-	#endregion
-
 	#region Controller
 	[Net, Predicted]
 	public PlayerController Controller { get; set; }
@@ -304,7 +272,7 @@ public partial class Player : AnimatedEntity
 
 	public PawnController GetActiveController()
 	{
-		return DevController ?? Controller;
+		return Controller;
 	}
 	#endregion
 

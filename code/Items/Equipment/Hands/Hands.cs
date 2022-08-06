@@ -147,7 +147,7 @@ public partial class Hands : Carriable
 		base.ActiveEnd( player, dropped );
 	}
 
-	public override void SimulateAnimator( PawnAnimator animator )
+	public override void SimulateAnimator( PlayerAnimator animator )
 	{
 		if ( !IsServer )
 			return;

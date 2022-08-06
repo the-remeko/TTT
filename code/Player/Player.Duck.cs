@@ -13,13 +13,11 @@ public partial class PlayerController : PawnController
 	[Net, Predicted]
 	public bool Ducked { get; private set; } = false;
 	[Net, Predicted]
+	public bool AirDucked { get; private set; } = false;
+	[Net, Predicted]
 	public float DuckFraction { get; private set; } = 0f;
 
 	[Net] public float DuckToggleSpeed { get; set; } = 7.0f;
-	[Net] public float DuckHoldTime { get; set; } = 0.72f;
-
-	[Net, Predicted]
-	public TimeUntil DuckHoldUntil { get; private set; }
 
 
 	public virtual void DuckPreTick()
@@ -27,11 +25,8 @@ public partial class PlayerController : PawnController
 		var shouldDuck = Input.Down( InputButton.Duck );
 		var onGround = GroundEntity != null;
 
-		// Prevent cheap duck spamming exploit while airborne.
-		if ( DuckHoldUntil > 0 )
-		{
-			if ( onGround ) DuckHoldUntil = 0;
-			else shouldDuck = true;
+		if(onGround) {
+			AirDucked = false;
 		}
 
 		// Toggle instantly if airborne.
@@ -68,6 +63,8 @@ public partial class PlayerController : PawnController
 		// Animation
 		if ( Ducked )
 			SetTag( "ducked" );
+		if( AirDucked )
+			SetTag("airducked");
 	}
 
 	public void Duck()
@@ -83,13 +80,13 @@ public partial class PlayerController : PawnController
 		// Tuck legs upward only if airborne.
 		if ( GroundEntity == null )
 		{
-			DuckHoldUntil = DuckHoldTime;
-
 			var distToCeil = TraceBBox( Position, Position + (Vector3.Up * DefaultHeight * 2f) ).Distance;
 			var shift = MathF.Min( distToCeil, DuckHullOffset() );
 
 			Position += Vector3.Up * shift;
 			UpdateView( snapCamera: true );
+
+			AirDucked = true;
 		}
 	}
 
@@ -111,6 +108,7 @@ public partial class PlayerController : PawnController
 			return;
 
 		Ducked = false;
+		AirDucked = false;
 		DuckFraction = 0;
 
 		UpdateBBox();

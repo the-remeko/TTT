@@ -76,11 +76,14 @@ public partial class Corpse : ModelEntity, IEntityHint, IUse
 		{
 			if ( clothing.Model == Detective.Hat && (HitboxGroup)GetHitboxGroup( Player.LastDamage.HitboxIndex ) == HitboxGroup.Head )
 			{
-				clothing.Detach();
+				Player.DetachClothing(clothing);
 				clothing.PhysicsGroup.AddVelocity( Player.LastDamage.Force );
 			}
 			else
+			{
+				Player.Clothes.Remove(clothing);
 				clothing.SetParent( this, true );
+			}
 		}
 
 		Player.SetClothingBodyGroups( this, 1 );

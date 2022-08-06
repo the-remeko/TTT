@@ -9,7 +9,7 @@ public class FlareGun : Weapon
 {
 	public override string SlotText => AmmoClip.ToString();
 
-	public override void SimulateAnimator( PawnAnimator animator )
+	public override void SimulateAnimator( PlayerAnimator animator )
 	{
 		base.SimulateAnimator( animator );
 
