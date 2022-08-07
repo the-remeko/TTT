@@ -13,25 +13,23 @@ public partial class PlayerController : PawnController
 	[Net, Predicted]
 	public bool Ducked { get; private set; } = false;
 	[Net, Predicted]
+	public bool AirDucked { get; private set; } = false;
+	[Net, Predicted]
 	public float DuckFraction { get; private set; } = 0f;
 
 	[Net] public float DuckToggleSpeed { get; set; } = 7.0f;
 	[Net] public float DuckHoldTime { get; set; } = 0.72f;
-
-	[Net, Predicted]
-	public TimeUntil DuckHoldUntil { get; private set; }
-
 
 	public virtual void DuckPreTick()
 	{
 		var shouldDuck = Input.Down( InputButton.Duck );
 		var onGround = GroundEntity != null;
 
-		// Prevent cheap duck spamming exploit while airborne.
-		if ( DuckHoldUntil > 0 )
+		if(onGround && AirDucked)
 		{
-			if ( onGround ) DuckHoldUntil = 0;
-			else shouldDuck = true;
+			Position += Vector3.Up * DuckHullOffset();
+			AirDucked = false;
+			UpdateView( snapCamera: true );
 		}
 
 		// Toggle instantly if airborne.
@@ -82,13 +80,7 @@ public partial class PlayerController : PawnController
 		// Tuck legs upward only if airborne.
 		if ( GroundEntity == null )
 		{
-			DuckHoldUntil = DuckHoldTime;
-
-			// var distToCeil = TraceBBox( Position, Position + (Vector3.Up * DefaultHeight * 2f) ).Distance;
-			// var shift = MathF.Min( distToCeil, DuckHullOffset() );
-
-			// Position += Vector3.Up * shift;
-			// UpdateView( snapCamera: true );
+			AirDucked = true;
 		}
 	}
 
@@ -110,19 +102,10 @@ public partial class PlayerController : PawnController
 			return;
 
 		Ducked = false;
+		AirDucked = false;
 		DuckFraction = 0;
 
 		UpdateBBox();
-
-		// Extend legs downward only if airborne.
-		/*if ( GroundEntity == null )
-		{
-			var distToGround = TraceBBox( Position, Position + Vector3.Down * DefaultHeight * 2f ).Distance;
-			var shift = MathF.Min( DuckHullOffset(), distToGround );
-
-			Position += Vector3.Down * shift;
-			UpdateView( snapCamera: true );
-		}*/
 	}
 
 	public float ActiveEyeHeight()
@@ -130,6 +113,9 @@ public partial class PlayerController : PawnController
 		var eyeOffset = DefaultHeight - EyeHeight;
 		var zStand = DefaultHeight - eyeOffset;
 		var zDuck = DuckHeight - eyeOffset;
+
+		if ( AirDucked )
+			zDuck += DuckHullOffset();
 
 		return zDuck + ((zStand - zDuck) * (1 - DuckFraction));
 	}
@@ -147,8 +133,15 @@ public partial class PlayerController : PawnController
 		_mins = mins;
 		_maxs = maxs;
 
-		if ( Ducked )
+		if ( Ducked )		{
 			maxs = maxs.WithZ( DuckHeight * scale );
+
+			if ( AirDucked )
+			{
+				mins = mins.WithZ( DuckHeight * scale );
+				maxs = maxs.WithZ( maxs.z + DuckHullOffset() );
+			}
+		}
 	}
 
 }
