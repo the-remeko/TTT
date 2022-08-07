@@ -133,7 +133,7 @@ public partial class PlayerController : PawnController
 		_mins = mins;
 		_maxs = maxs;
 
-		if ( Ducked )		{
+		if ( Ducked ) {
 			maxs = maxs.WithZ( DuckHeight * scale );
 
 			if ( AirDucked )
