@@ -49,16 +49,7 @@ public sealed partial class Inventory : BaseNetworkable, IEnumerable<Carriable>
 		if ( !CanAdd( carriable ) )
 			return false;
 
-		carriable.SetParent( Owner.PlayerModel, true );
-
-		_list.Add(carriable);
-
-		carriable.OnCarryStart( Owner );
-
-		_slotCapacity[(int)carriable.Info.Slot] -= 1;
-
-		if ( carriable is Weapon weapon )
-			_weaponsOfAmmoType[(int)weapon.Info.AmmoType] += 1;
+		OnChildAdded(carriable);
 
 		if ( makeActive )
 			SetActive( carriable );
@@ -168,7 +159,6 @@ public sealed partial class Inventory : BaseNetworkable, IEnumerable<Carriable>
 			return false;
 
 		OnChildRemoved(carriable);
-		carriable.Parent = null;
 
 		return true;
 	}
@@ -206,8 +196,12 @@ public sealed partial class Inventory : BaseNetworkable, IEnumerable<Carriable>
 	{
 		Host.AssertServer();
 
-		foreach ( var carriable in _list )
+		for ( var i = _list.Count - 1; i > -1; i-- )
+		{
+			var carriable = _list[i];
+			OnChildRemoved(carriable);
 			carriable.Delete();
+		}
 
 		Active = null;
 
@@ -226,6 +220,8 @@ public sealed partial class Inventory : BaseNetworkable, IEnumerable<Carriable>
 
 		carriable.OnCarryStart( Owner );
 
+		carriable.SetParent( Owner.PlayerModel, true );
+
 		_slotCapacity[(int)carriable.Info.Slot] -= 1;
 
 		if ( carriable is Weapon weapon )
@@ -237,6 +233,7 @@ public sealed partial class Inventory : BaseNetworkable, IEnumerable<Carriable>
 		if ( !_list.Remove( carriable ) )
 			return;
 
+		carriable.Parent = null;
 		carriable.OnCarryDrop( Owner );
 
 		_slotCapacity[(int)carriable.Info.Slot] += 1;
