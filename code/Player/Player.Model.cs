@@ -37,6 +37,11 @@ public partial class PlayerModel : AnimatedEntity
 		Animator = new PlayerAnimator();
 	}
 
+	public override void TakeDamage( DamageInfo damageInfo )
+	{
+		Owner.TakeDamage(damageInfo);
+	}
+
 	#region Animator
 	[Net, Predicted]
 	public PlayerAnimator Animator { get; private set; }

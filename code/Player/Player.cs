@@ -112,6 +112,7 @@ public partial class Player : AnimatedEntity
 			EnableAllCollisions = true;
 			PlayerModel.EnableDrawing = true;
 			EnableTouch = true;
+			PlayerModel.EnableAllCollisions = true;
 
 			Controller = new PlayerController()
 			{
