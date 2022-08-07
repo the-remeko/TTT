@@ -78,6 +78,7 @@ public partial class Player
 	{
 		Clothes.Remove(clothing);
 		clothing.SetParent(null);
+		clothing.EnableAllCollisions = true;
 		clothing.PhysicsEnabled = true;
 		clothing.UsePhysicsCollision = true;
 	}
