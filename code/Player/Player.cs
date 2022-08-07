@@ -9,9 +9,10 @@ public partial class Player : AnimatedEntity
 	public PlayerModel PlayerModel { get; set; }
 	[Net, Predicted]
 	public PlayerAnimator Animator { get; private set; }
-	[Net, Predicted]
-	public Inventory Inventory { get; private init; }
+	[Net]
+	public Inventory Inventory { get; private set; }
 	public Perks Perks { get; private init; }
+
 
 	public CameraMode Camera
 	{
@@ -47,7 +48,6 @@ public partial class Player : AnimatedEntity
 
 	public Player()
 	{
-		Inventory = new( this );
 		Perks = new( this );
 	}
 
@@ -71,7 +71,8 @@ public partial class Player : AnimatedEntity
 		EnableShadowInFirstPerson = true;
 		EnableTouch = false;
 
-		PlayerModel = new PlayerModel();
+		Inventory = new(this);
+		PlayerModel = new();
 		PlayerModel.Parent = this;
 		Animator = PlayerModel.Animator;
 
@@ -169,7 +170,6 @@ public partial class Player : AnimatedEntity
 
 	public override void Simulate( Client client )
 	{
-
 		var controller = GetActiveController();
 		controller?.Simulate( client, this, Animator );
 
@@ -369,11 +369,6 @@ public partial class Player : AnimatedEntity
 	{
 		switch ( child )
 		{
-			case Carriable carriable:
-			{
-				Inventory.OnChildAdded( carriable );
-				break;
-			}
 			case Clothing clothing:
 			{
 				Clothes.Add( clothing );

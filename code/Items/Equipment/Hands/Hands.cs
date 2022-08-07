@@ -127,7 +127,7 @@ public partial class Hands : Carriable
 
 		GrabPoint = new ModelEntity( "models/hands/grabpoint.vmdl" );
 		GrabPoint.EnableHideInFirstPerson = false;
-		GrabPoint.SetParent( player, MiddleHandsAttachment, new Transform( Vector3.Zero, Rotation.FromRoll( -90 ) ) );
+		GrabPoint.SetParent( player.PlayerModel, MiddleHandsAttachment, new Transform( Vector3.Zero, Rotation.FromRoll( -90 ) ) );
 	}
 
 	public override void OnCarryDrop( Player player )

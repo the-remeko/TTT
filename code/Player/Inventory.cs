@@ -10,7 +10,8 @@ namespace TTT;
 /// </summary>
 public sealed partial class Inventory : BaseNetworkable, IEnumerable<Carriable>
 {
-	public Player Owner { get; private init; }
+	[Net]
+	public Player Owner { get; private set; }
 
 	public Carriable Active
 	{
@@ -22,7 +23,7 @@ public sealed partial class Inventory : BaseNetworkable, IEnumerable<Carriable>
 
 	public int Count => _list.Count;
 
-	[Net, Predicted]
+	[Net]
 	private IList<Carriable> _list { get; set; }
 
 	private readonly int[] _slotCapacity = new int[] { 1, 1, 1, 3, 3, 1 };
@@ -30,6 +31,8 @@ public sealed partial class Inventory : BaseNetworkable, IEnumerable<Carriable>
 
 	private const float DropPositionOffset = 3f;
 	private const float DropVelocity = 500f;
+
+	public Inventory() {}
 
 	public Inventory( Player player ) => Owner = player;
 
