@@ -192,8 +192,10 @@ public sealed partial class Inventory : BaseNetworkable, IEnumerable<Carriable>
 	{
 		Host.AssertServer();
 
-		foreach ( var carriable in _list )
-			Drop( carriable );
+		for(var i = _list.Count - 1; i > -1; i--)
+		{
+			Drop( _list[i] );
+		}
 
 		Active = null;
 

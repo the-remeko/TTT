@@ -5,20 +5,26 @@ namespace TTT;
 [Title( "PlayerModel" ), Icon( "emoji_people" )]
 public partial class PlayerModel : AnimatedEntity
 {
-	public PlayerModel() {
+	[Net]
+	public Player Owner { get; private set; }
+
+	public PlayerModel() {}
+
+	public PlayerModel( Player player )
+	{
+		Owner = player;
+		Parent = player;
 	}
 
 	public override void Spawn()
 	{
 		base.Spawn();
 
-		Tags.Add( "player" );
+		Tags.Add( "playermodel" );
 		Tags.Add( "solid" );
 
 		SetModel( "models/citizen/citizen.vmdl" );
 
-		Health = 0;
-		LifeState = LifeState.Respawnable;
 		Transmit = TransmitType.Always;
 
 		EnableAllCollisions = false;

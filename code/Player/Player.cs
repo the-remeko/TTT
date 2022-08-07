@@ -72,8 +72,7 @@ public partial class Player : AnimatedEntity
 		EnableTouch = false;
 
 		Inventory = new(this);
-		PlayerModel = new();
-		PlayerModel.Parent = this;
+		PlayerModel = new(this);
 		Animator = PlayerModel.Animator;
 
 		Camera = new FreeSpectateCamera();
@@ -279,7 +278,7 @@ public partial class Player : AnimatedEntity
 	public void CreateHull()
 	{
 		SetupPhysicsFromAABB( PhysicsMotionType.Keyframed, new Vector3( -16, -16, 0 ), new Vector3( 16, 16, 72 ) );
-		EnableHitboxes = true;
+		PlayerModel.EnableHitboxes = true;
 	}
 
 	public override void StartTouch( Entity other )

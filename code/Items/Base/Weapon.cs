@@ -248,8 +248,8 @@ public abstract partial class Weapon : Carriable
 						.WithAttacker( Owner )
 						.WithWeapon( this );
 
-					if ( trace.Entity is Player player )
-						player.DistanceToAttacker = Vector3.DistanceBetween( Owner.Position, player.Position ).SourceUnitsToMeters();
+					if ( trace.Entity is PlayerModel playerModel )
+						playerModel.Owner.DistanceToAttacker = Vector3.DistanceBetween( Owner.Position, playerModel.Owner.Position ).SourceUnitsToMeters();
 
 					trace.Entity.TakeDamage( damageInfo );
 				}
@@ -273,7 +273,7 @@ public abstract partial class Weapon : Carriable
 
 		var trace = Trace.Ray( start, end )
 				.UseHitboxes()
-				.WithAnyTags( "solid", "player", "glass", "trigger" )
+				.WithAnyTags( "solid", "playermodel", "glass", "trigger" )
 				.Ignore( this )
 				.Size( radius );
 

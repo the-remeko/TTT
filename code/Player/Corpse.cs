@@ -65,12 +65,12 @@ public partial class Corpse : ModelEntity, IEntityHint, IUse
 
 		KillList = Player.PlayersKilled.ToArray();
 
-		SetModel( player.GetModelName() );
-		TakeDecalsFrom( player );
+		SetModel( player.PlayerModel.GetModelName() );
+		TakeDecalsFrom( player.PlayerModel );
 
-		this.CopyBonesFrom( player );
-		this.SetRagdollVelocityFrom( player );
-		ApplyForceToBone( Player.LastDamage.Force, Player.GetHitboxBone( Player.LastDamage.HitboxIndex ) );
+		this.CopyBonesFrom( player.PlayerModel );
+		this.SetRagdollVelocityFrom( player.PlayerModel );
+		ApplyForceToBone( Player.LastDamage.Force, Player.PlayerModel.GetHitboxBone( Player.LastDamage.HitboxIndex ) );
 
 		foreach ( var clothing in Player.Clothes.ToArray() )
 		{

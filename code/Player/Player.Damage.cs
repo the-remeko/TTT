@@ -127,7 +127,7 @@ public partial class Player
 		StopUsing();
 
 		EnableAllCollisions = false;
-		EnableDrawing = false;
+		PlayerModel.EnableDrawing = false;
 		EnableTouch = false;
 
 		Inventory.DropAll();
@@ -216,7 +216,7 @@ public partial class Player
 		if ( Perks.Has<Armor>() )
 			damageMultiplier *= Armor.ReductionPercentage;
 
-		var hitboxGroup = (HitboxGroup)GetHitboxGroup( info.HitboxIndex );
+		var hitboxGroup = (HitboxGroup)PlayerModel.GetHitboxGroup( info.HitboxIndex );
 
 		if ( hitboxGroup == HitboxGroup.Head )
 		{
