@@ -25,11 +25,15 @@ public partial class PlayerController : PawnController
 		var shouldDuck = Input.Down( InputButton.Duck );
 		var onGround = GroundEntity != null;
 
-		if(onGround && AirDucked)
+		if(AirDucked)
 		{
-			Position += Vector3.Up * DuckHullOffset();
-			AirDucked = false;
-			UpdateView( snapCamera: true );
+			if(onGround)
+			{
+				Position += Vector3.Up * DuckHullOffset();
+				AirDucked = false;
+				UpdateView( snapCamera: true );
+			}
+			SetTag("airducked");
 		}
 
 		// Toggle instantly if airborne.

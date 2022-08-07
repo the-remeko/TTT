@@ -40,7 +40,7 @@ public class PlayerAnimator : PawnAnimator
 		SetLookAt( "aim_head", lookPos );
 		SetLookAt( "aim_body", aimPos );
 
-		if ( HasTag( "ducked" ) )
+		if ( HasTag( "ducked" ) && !HasTag("airducked") && GroundEntity is not null)
 			_duck = _duck.LerpTo( 1.0f, Time.Delta * 10.0f );
 		else
 			_duck = _duck.LerpTo( 0.0f, Time.Delta * 5.0f );
