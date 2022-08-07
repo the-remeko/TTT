@@ -50,7 +50,7 @@ public partial class InspectMenu : Panel
 			$"It appears a {player.LastAttackerWeaponInfo.Title} was used to kill them.",
 			player.LastAttackerWeaponInfo.Icon.ResourcePath );
 
-		var hitboxGroup = (HitboxGroup)player.GetHitboxGroup( player.LastDamage.HitboxIndex );
+		var hitboxGroup = (HitboxGroup)player.PlayerModel.GetHitboxGroup( player.LastDamage.HitboxIndex );
 		if ( hitboxGroup == HitboxGroup.Head )
 			AddInspectEntry( "Headshot", "The fatal wound was a headshot. No time to scream.", "/ui/inspectmenu/headshot.png" );
 
