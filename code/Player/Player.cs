@@ -49,6 +49,7 @@ public partial class Player : AnimatedEntity
 	public Player()
 	{
 		Perks = new( this );
+		Inventory = new( this );
 	}
 
 	public override void Spawn()
@@ -71,7 +72,6 @@ public partial class Player : AnimatedEntity
 		EnableShadowInFirstPerson = true;
 		EnableTouch = false;
 
-		Inventory = new(this);
 		PlayerModel = new(this);
 		Animator = PlayerModel.Animator;
 
